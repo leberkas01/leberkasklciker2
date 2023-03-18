@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Leberkasklicker</title>
+    <style>
+      body {
+        background-color: #4a2c00;
+        text-align: center;
+        color: white;
+        font-family: Arial, sans-serif;
+      }
+      
+      #leberkaese {
+        width: 400px;
+        height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Leberkasklicker</h1>
+    <p>Klicke auf den Leberkäse, um Punkte zu sammeln!</p>
+    <img src="leberkas_x1.jpg" id="leberkaese">
+    <p id="punkte">Punkte: 0</p>
+    <p id="level">Level: 1</p>
+    <script>
+      var leberkaese = document.getElementById("leberkaese");
+      var punkte = document.getElementById("punkte");
+      var punktzahl = 0;
+      var level = document.getElementById("level");
+      var levelzahl = 1;
+      var boost = false;
+      var boostanzahl = 0;
+
+      leberkaese.addEventListener("click", function() {
+        if (boost) {
+          punktzahl += 2;
+          boostanzahl++;
+          if (boostanzahl >= 200) {
+            boost = false;
+            boostanzahl = 0;
+          }
+        } else {
+          punktzahl++;
+        }
+        punkte.innerHTML = "Punkte: " + punktzahl;
+        if (punktzahl >= levelzahl * 1000 && levelzahl < 30) {
+          levelzahl++;
+          punktzahl = 0;
+          punkte.innerHTML = "Punkte: " + punktzahl;
+          level.innerHTML = "Level: " + levelzahl;
+          boost = true;
+        } else if (levelzahl == 30) {
+          punktzahl = 0;
+          punkte.innerHTML = "Punkte: " + punktzahl;
+          alert("Herzlichen Glückwunsch, du hast das höchste Level erreicht!");
+        }
+      });
+    </script>
+  </body>
+</html>
