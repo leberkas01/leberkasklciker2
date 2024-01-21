@@ -1,60 +1,134 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Leberkasklicker</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Leberkas Clicker</title>
     <style>
-      body {
-        background-color: #4a2c00;
-        text-align: center;
-        color: white;
-        font-family: Arial, sans-serif;
-      }
-      
-      #leberkaese {
-        width: 400px;
-        height: 400px;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Leberkasklicker</h1>
-    <p>Klicke auf den Leberkäse, um Punkte zu sammeln!</p>
-    <img src="leberkas_x1.jpg" id="leberkaese">
-    <p id="punkte">Punkte: 0</p>
-    <p id="level">Level: 1</p>
-    <script>
-      var leberkaese = document.getElementById("leberkaese");
-      var punkte = document.getElementById("punkte");
-      var punktzahl = 0;
-      var level = document.getElementById("level");
-      var levelzahl = 1;
-      var boost = false;
-      var boostanzahl = 0;
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #8B4513; /* Brauner Hintergrund */
+            color: #fff; /* Weiße Schriftfarbe */
+        }
 
-      leberkaese.addEventListener("click", function() {
-        if (boost) {
-          punktzahl += 2;
-          boostanzahl++;
-          if (boostanzahl >= 200) {
-            boost = false;
-            boostanzahl = 0;
-          }
-        } else {
-          punktzahl++;
+        #container {
+            margin: 50px;
         }
-        punkte.innerHTML = "Punkte: " + punktzahl;
-        if (punktzahl >= levelzahl * 1000 && levelzahl < 30) {
-          levelzahl++;
-          punktzahl = 0;
-          punkte.innerHTML = "Punkte: " + punktzahl;
-          level.innerHTML = "Level: " + levelzahl;
-          boost = true;
-        } else if (levelzahl == 30) {
-          punktzahl = 0;
-          punkte.innerHTML = "Punkte: " + punktzahl;
-          alert("Herzlichen Glückwunsch, du hast das höchste Level erreicht!");
+
+        #leberkas {
+            width: 200px;
+            height: 200px;
+            cursor: pointer;
         }
-      });
+
+        #score {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+
+        #progress {
+            margin-top: 10px;
+            height: 20px;
+            background-color: #ccc;
+            position: relative;
+        }
+
+        #progress-bar {
+            height: 100%;
+            background-color: #4CAF50; /* Grüne Farbe für den Fortschrittsbalken */
+            transition: width 0.5s ease-in-out; /* Animation für den Fortschrittsbalken */
+        }
+
+        #level {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+
+        .upgrade {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Leberkas Clicker</h1>
+        <img id="leberkas" src="leberkas_t.png">
+        <div id="score">Score: 0</div>
+        <div id="progress">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="level">Level: 1</div>
+    </div>
+
+    <script>
+        let score = 0;
+        let clicksNeeded = 200;
+        let currentLevel = 1;
+        let clickValue = 1; // Standardwert für Klickwert
+
+        function incrementScore() {
+            score += clickValue;
+            document.getElementById('score').innerText = 'Score: ' + score;
+
+            // Überprüfe, ob das nächste Level erreicht wurde
+            if (score >= clicksNeeded) {
+                // Erhöhe das Level
+                currentLevel++;
+                document.getElementById('level').innerText = 'Level: ' + currentLevel;
+
+                // Setze die benötigten Klicks für das nächste Level
+                clicksNeeded = Math.round(clicksNeeded * 3); // 300% mehr Klicks
+
+                // Setze den Fortschrittsbalken und den Score zurück
+                document.getElementById('progress-bar').style.width = '0';
+                score = 0;
+                document.getElementById('score').innerText = 'Score: ' + score;
+
+                // Vergebe automatisch das nächste Upgrade
+                if (currentLevel <= 9) {
+                    // Aktualisiere den Klickwert basierend auf dem aktuellen Level
+                    clickValue = getClickValue(currentLevel);
+
+                    // Zeige den Upgrade-Knopf an
+                    document.getElementById('upgrade' + currentLevel).style.display = 'inline-block';
+                }
+            }
+
+            // Aktualisiere den Fortschrittsbalken basierend auf dem Fortschritt zum nächsten Level
+            const progress = (score / clicksNeeded) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        function getClickValue(level) {
+            // Funktion, um den Klickwert basierend auf dem Level zu berechnen
+            switch (level) {
+                case 1:
+                    return 2;
+                case 2:
+                    return 5;
+                case 3:
+                    return 10;
+                case 4:
+                    return 15;
+                case 5:
+                    return 20;
+                case 6:
+                    return 25;
+                case 7:
+                    return 35;
+                case 8:
+                    return 40;
+                case 9:
+                    return 50;
+                default:
+                    return 1;
+            }
+        }
+
+        document.getElementById('leberkas').addEventListener('click', incrementScore);
     </script>
-  </body>
+</body>
 </html>
