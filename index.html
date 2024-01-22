@@ -50,6 +50,28 @@
         .upgrade {
             display: none;
         }
+
+        .skin-button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .skin-option {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        #notification {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #f00; /* Rote Farbe für Benachrichtigungen */
+        }
     </style>
 </head>
 <body>
@@ -61,6 +83,18 @@
             <div id="progress-bar"></div>
         </div>
         <div id="level">Level: 1</div>
+
+        <!-- Skin-Shop-Button -->
+        <div class="skin-button" onclick="toggleSkinShop()">Open Skin Shop</div>
+
+        <!-- Skin-Shop -->
+        <div id="skin-shop" style="display: none;">
+            <h2>Skin Shop</h2>
+            <div id="skin-default" class="skin-option" onclick="selectSkin('leberkas_t.png')">Default Leberkas</div>
+            <div id="skin-alternative" class="skin-option" onclick="buySkin('leberkas_x1.png', 50000)">Alternative Skin (50k)</div>
+            <div id="skin-new" class="skin-option" onclick="buySkin('leberkassemmal.png', 250000)">Neuer Skin (250k)</div>
+            <div id="notification"></div>
+        </div>
     </div>
 
     <script>
@@ -68,6 +102,12 @@
         let clicksNeeded = 200;
         let currentLevel = 1;
         let clickValue = 1; // Standardwert für Klickwert
+        let currentSkin = 'leberkas_t.png'; // Standard-Skin
+        let purchasedSkins = {
+            'leberkas_t.png': true, // Standard-Skin ist immer frei
+            'leberkas_x1.png': false,
+            'leberkassemmal.png': false
+        };
 
         function incrementScore() {
             score += clickValue;
@@ -94,12 +134,19 @@
 
                     // Zeige den Upgrade-Knopf an
                     document.getElementById('upgrade' + currentLevel).style.display = 'inline-block';
+                } else {
+                    // Alle Upgrades erreicht
+                    document.getElementById('upgrade' + currentLevel).style.display = 'none';
+                    clickValue += 5; // Erhöhe den Score pro Klick nach jedem Level um 5
                 }
             }
 
             // Aktualisiere den Fortschrittsbalken basierend auf dem Fortschritt zum nächsten Level
             const progress = (score / clicksNeeded) * 100;
             document.getElementById('progress-bar').style.width = progress + '%';
+
+            // Aktualisiere Skin-Optionen
+            updateSkinOptions();
         }
 
         function getClickValue(level) {
@@ -126,6 +173,88 @@
                 default:
                     return 1;
             }
+        }
+
+        // Skin-Shop Funktionen
+        function toggleSkinShop() {
+            // Öffne oder schließe den Skin-Shop
+            const skinShop = document.getElementById('skin-shop');
+            const skinButton = document.querySelector('.skin-button');
+            if (skinShop.style.display === 'none' || !skinShop.style.display) {
+                skinShop.style.display = 'block';
+                skinButton.innerText = 'Close Skin Shop';
+            } else {
+                skinShop.style.display = 'none';
+                skinButton.innerText = 'Open Skin Shop';
+            }
+        }
+
+        function updateSkinOptions() {
+            // Aktualisiere Skin-Optionen basierend auf verfügbaren Skins und Punkten
+            const defaultSkinOption = document.getElementById('skin-default');
+            const alternativeSkinOption = document.getElementById('skin-alternative');
+            const newSkinOption = document.getElementById('skin-new');
+
+            if (purchasedSkins['leberkas_x1.png']) {
+                alternativeSkinOption.classList.add('owned-skin');
+            } else {
+                alternativeSkinOption.classList.remove('owned-skin');
+            }
+
+            if (purchasedSkins['leberkassemmal.png']) {
+                newSkinOption.classList.add('owned-skin');
+            } else {
+                newSkinOption.classList.remove('owned-skin');
+            }
+
+            if (currentSkin === 'leberkas_t.png') {
+                defaultSkinOption.classList.add('used-skin');
+            } else {
+                defaultSkinOption.classList.remove('used-skin');
+            }
+
+            if (currentSkin === 'leberkas_x1.png') {
+                alternativeSkinOption.classList.add('used-skin');
+            } else {
+                alternativeSkinOption.classList.remove('used-skin');
+            }
+
+            if (currentSkin === 'leberkassemmal.png') {
+                newSkinOption.classList.add('used-skin');
+            } else {
+                newSkinOption.classList.remove('used-skin');
+            }
+        }
+
+        function selectSkin(skin) {
+            // Wähle einen Skin aus dem Skin-Shop aus
+            currentSkin = skin;
+            usedSkin = currentSkin;
+            updateSkinOptions();
+        }
+
+        function buySkin(skin, price) {
+            // Kaufe einen Skin im Skin-Shop
+            if (score >= price && !purchasedSkins[skin]) {
+                score -= price;
+                purchasedSkins[skin] = true;
+                usedSkin = skin;
+                showNotification(`Skin purchased: ${skin}`);
+                updateSkinOptions();
+            } else if (purchasedSkins[skin]) {
+                showNotification('You already own this skin');
+            } else {
+                showNotification(`Not enough points for this skin. Price: ${price}`);
+            }
+        }
+
+        function showNotification(message) {
+            // Zeige eine Benachrichtigungsnachricht an
+            const notification = document.getElementById('notification');
+            notification.innerText = message;
+            setTimeout(() => {
+                notification.innerText = '';
+            }, 5000);
         }
 
         document.getElementById('leberkas').addEventListener('click', incrementScore);
