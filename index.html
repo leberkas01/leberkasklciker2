@@ -12,6 +12,7 @@
             text-align: center;
             background-color: #8B4513; /* Brauner Hintergrund */
             color: #fff; /* Weiße Schriftfarbe */
+            overflow: hidden; /* Verhindert Scrollen */
         }
 
         #container {
@@ -57,9 +58,42 @@
             background-color: #4CAF50;
             color: #fff;
             cursor: pointer;
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
         }
 
-        .skin-option {
+        .shop-button,
+        .wardrobe-button {
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            background-size: cover;
+            margin-right: 20px;
+            display: inline-block;
+        }
+
+        #skin-shop,
+        #wardrobe {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            opacity: 0;
+            background-color: #8B4513;
+            z-index: 2;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .skin-option,
+        .owned-skin {
             margin-top: 10px;
             padding: 10px;
             background-color: #4CAF50;
@@ -67,10 +101,27 @@
             cursor: pointer;
         }
 
+        .used-skin {
+            color: #f00; /* Rote Farbe für "In Benutzung" */
+        }
+
         #notification {
-            margin-top: 10px;
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
             font-size: 16px;
             color: #f00; /* Rote Farbe für Benachrichtigungen */
+            display: none;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            color: #fff;
         }
     </style>
 </head>
@@ -84,17 +135,33 @@
         </div>
         <div id="level">Level: 1</div>
 
-        <!-- Skin-Shop-Button -->
-        <div class="skin-button" onclick="toggleSkinShop()">Open Skin Shop</div>
+        <!-- Shop-Button -->
+        <div class="shop-button" onclick="toggleMenu('skin-shop')" style="background-image: url('shop.png')"></div>
+        
+        <!-- Garderobe-Button -->
+        <div class="wardrobe-button" onclick="toggleMenu('wardrobe')" style="background-image: url('garderobe.png')"></div>
 
         <!-- Skin-Shop -->
-        <div id="skin-shop" style="display: none;">
+        <div id="skin-shop">
             <h2>Skin Shop</h2>
-            <div id="skin-default" class="skin-option" onclick="selectSkin('leberkas_t.png')">Default Leberkas</div>
-            <div id="skin-alternative" class="skin-option" onclick="buySkin('leberkas_x1.png', 50000)">Alternative Skin (50k)</div>
-            <div id="skin-new" class="skin-option" onclick="buySkin('leberkassemmal.png', 250000)">Neuer Skin (250k)</div>
-            <div id="notification"></div>
+            <div class="skin-option" onclick="buySkin('leberkas_x1.png', 50000, 'skin1')">Alternative Skin</div>
+            <div class="skin-option" onclick="buySkin('leberkassemmal.png', 250000, 'skin2')">Neuer Skin</div>
+            <div class="close-button" onclick="toggleMenu('skin-shop')">X</div>
         </div>
+
+        <!-- Garderobe -->
+        <div id="wardrobe">
+            <h2>Garderobe</h2>
+            <!-- Skin-Optionen werden jetzt dynamisch generiert -->
+            <div class="owned-skin" id="skin1" data-skin="leberkas_x1.png" onclick="selectSkin('leberkas_x1.png')">Alternative Skin</div>
+            <div class="owned-skin" id="skin2" data-skin="leberkassemmal.png" onclick="selectSkin('leberkassemmal.png')">Neuer Skin</div>
+            <div class="close-button" onclick="toggleMenu('wardrobe')">X</div>
+        </div>
+
+        <!-- Notification -->
+        <div id="notification"></div>
+
+       
     </div>
 
     <script>
@@ -103,6 +170,7 @@
         let currentLevel = 1;
         let clickValue = 1; // Standardwert für Klickwert
         let currentSkin = 'leberkas_t.png'; // Standard-Skin
+        let usedSkin = 'leberkas_t.png'; // Derzeit benutzter Skin
         let purchasedSkins = {
             'leberkas_t.png': true, // Standard-Skin ist immer frei
             'leberkas_x1.png': false,
@@ -176,85 +244,84 @@
         }
 
         // Skin-Shop Funktionen
-        function toggleSkinShop() {
-            // Öffne oder schließe den Skin-Shop
-            const skinShop = document.getElementById('skin-shop');
-            const skinButton = document.querySelector('.skin-button');
-            if (skinShop.style.display === 'none' || !skinShop.style.display) {
-                skinShop.style.display = 'block';
-                skinButton.innerText = 'Close Skin Shop';
+        function toggleMenu(menuId) {
+            // Öffne oder schließe das Menü mit Animation
+            const menu = document.getElementById(menuId);
+            const scaleValue = menu.style.display === 'none' ? 1 : 0.5;
+            const opacityValue = menu.style.display === 'none' ? 1 : 0;
+
+            menu.style.transition = 'transform 0.5s ease-in-out, opacity 0.5s ease-in-out';
+            menu.style.transform = `translate(-50%, -50%) scale(${scaleValue})`;
+            menu.style.opacity = opacityValue;
+
+            if (menu.style.display === 'none' || !menu.style.display) {
+                menu.style.display = 'block';
+                showNotification(menuId.charAt(0).toUpperCase() + menuId.slice(1)); // Zeige Menü-Name in Benachrichtigung an
             } else {
-                skinShop.style.display = 'none';
-                skinButton.innerText = 'Open Skin Shop';
+                setTimeout(() => {
+                    menu.style.display = 'none';
+                }, 500);
             }
         }
 
-        function updateSkinOptions() {
-            // Aktualisiere Skin-Optionen basierend auf verfügbaren Skins und Punkten
-            const defaultSkinOption = document.getElementById('skin-default');
-            const alternativeSkinOption = document.getElementById('skin-alternative');
-            const newSkinOption = document.getElementById('skin-new');
+        function buySkin(skin, price, skinId) {
+    // Kaufe einen Skin
+    if (score >= price && !purchasedSkins[skin]) {
+        score -= price;
+        purchasedSkins[skin] = true;
+        showNotification('Bought skin');
+        // Aktualisiere Skin-Optionen
+        updateSkinOptions();
+    } else if (purchasedSkins[skin]) {
+        showNotification('Already owned');
+    } else {
+        showNotification('Not enough points for this skin');
+    }
+}
 
-            if (purchasedSkins['leberkas_x1.png']) {
-                alternativeSkinOption.classList.add('owned-skin');
-            } else {
-                alternativeSkinOption.classList.remove('owned-skin');
-            }
 
-            if (purchasedSkins['leberkassemmal.png']) {
-                newSkinOption.classList.add('owned-skin');
-            } else {
-                newSkinOption.classList.remove('owned-skin');
-            }
+function updateSkinOptions() {
+    // Aktualisiere Skin-Optionen basierend auf verfügbaren Skins und Punkten
+    const ownedSkins = document.querySelectorAll('.owned-skin');
 
-            if (currentSkin === 'leberkas_t.png') {
-                defaultSkinOption.classList.add('used-skin');
-            } else {
-                defaultSkinOption.classList.remove('used-skin');
-            }
-
-            if (currentSkin === 'leberkas_x1.png') {
-                alternativeSkinOption.classList.add('used-skin');
-            } else {
-                alternativeSkinOption.classList.remove('used-skin');
-            }
-
-            if (currentSkin === 'leberkassemmal.png') {
-                newSkinOption.classList.add('used-skin');
-            } else {
-                newSkinOption.classList.remove('used-skin');
-            }
+    ownedSkins.forEach(skinOption => {
+        const skin = skinOption.getAttribute('data-skin');
+        if (purchasedSkins[skin]) {
+            skinOption.classList.add('owned');
+        } else {
+            skinOption.classList.remove('owned');
         }
 
-        function selectSkin(skin) {
-            // Wähle einen Skin aus dem Skin-Shop aus
-            currentSkin = skin;
-            usedSkin = currentSkin;
-            updateSkinOptions();
+        if (currentSkin === skin) {
+            skinOption.classList.add('used-skin');
+        } else {
+            skinOption.classList.remove('used-skin');
         }
+    });
+}
 
-        function buySkin(skin, price) {
-            // Kaufe einen Skin im Skin-Shop
-            if (score >= price && !purchasedSkins[skin]) {
-                score -= price;
-                purchasedSkins[skin] = true;
-                usedSkin = skin;
-                showNotification(`Skin purchased: ${skin}`);
-                updateSkinOptions();
-            } else if (purchasedSkins[skin]) {
-                showNotification('You already own this skin');
-            } else {
-                showNotification(`Not enough points for this skin. Price: ${price}`);
-            }
-        }
+function selectSkin(skin) {
+    // Wähle einen Skin aus der Garderobe aus
+    currentSkin = skin;
+    usedSkin = currentSkin;
+    updateSkinOptions();
+
+    // Ändere das Bild des Leberkas entsprechend dem ausgewählten Skin
+    document.getElementById('leberkas').src = currentSkin;
+
+    toggleMenu('wardrobe'); // Schließe die Garderobe
+}
+
+
 
         function showNotification(message) {
             // Zeige eine Benachrichtigungsnachricht an
             const notification = document.getElementById('notification');
             notification.innerText = message;
+            notification.style.display = 'block';
             setTimeout(() => {
-                notification.innerText = '';
-            }, 5000);
+                notification.style.display = 'none';
+            }, 2000);
         }
 
         document.getElementById('leberkas').addEventListener('click', incrementScore);
