@@ -301,15 +301,19 @@ function updateSkinOptions() {
 }
 
 function selectSkin(skin) {
-    // Wähle einen Skin aus der Garderobe aus
-    currentSkin = skin;
-    usedSkin = currentSkin;
-    updateSkinOptions();
+    // Wähle einen Skin aus der Garderobe aus, nur wenn er gekauft wurde
+    if (purchasedSkins[skin]) {
+        currentSkin = skin;
+        usedSkin = currentSkin;
+        updateSkinOptions();
 
-    // Ändere das Bild des Leberkas entsprechend dem ausgewählten Skin
-    document.getElementById('leberkas').src = currentSkin;
+        // Ändere das Bild des Leberkas entsprechend dem ausgewählten Skin
+        document.getElementById('leberkas').src = currentSkin;
 
-    toggleMenu('wardrobe'); // Schließe die Garderobe
+        toggleMenu('wardrobe'); // Schließe die Garderobe
+    } else {
+        showNotification('Skin not owned');
+    }
 }
 
 
