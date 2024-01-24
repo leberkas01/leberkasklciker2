@@ -195,6 +195,13 @@
                 score = 0;
                 document.getElementById('score').innerText = 'Score: ' + score;
 
+// Je nach ausgewähltem Skin erhöhe den Klickwert weiter
+            if (currentSkin === 'leberkas_x1.png') {
+                clickValue += 40;
+            } else if (currentSkin === 'leberkassemmal.png') {
+                clickValue += 70;
+            }
+
                 // Vergebe automatisch das nächste Upgrade
                 if (currentLevel <= 9) {
                     // Aktualisiere den Klickwert basierend auf dem aktuellen Level
